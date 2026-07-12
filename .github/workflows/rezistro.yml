@@ -1,0 +1,98 @@
+name: Rezistro
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Rapido: Last.fm Recent, no menor intervalo permitido pelo GitHub Actions.
+    - cron: "3/5 * * * *"
+    # Normal: demais modulos leves/medios, duas vezes por hora.
+    - cron: "13,43 * * * *"
+    # Pesado: comparacao longa do AOTY, isolada e bem mais lenta.
+    - cron: "23 */6 * * *"
+
+concurrency:
+  group: rezistro
+  cancel-in-progress: false
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    env:
+      TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+      CHAT_ID: ${{ secrets.CHAT_ID }}
+      DISPLAY_NAME: ${{ secrets.DISPLAY_NAME }}
+      REAL_NAME: ${{ secrets.REAL_NAME }}
+      DISPLAY_EMOJI: ${{ secrets.DISPLAY_EMOJI }}
+      BDS_UID: ${{ secrets.BDS_UID }}
+      GOODREADS_USER_ID: ${{ secrets.GOODREADS_USER_ID }}
+      STEAM_USER: ${{ secrets.STEAM_USER }}
+      STEAM_API_KEY: ${{ secrets.STEAM_API_KEY }}
+      STEAM_ACHIEVEMENTS_APPIDS: ${{ secrets.STEAM_ACHIEVEMENTS_APPIDS }}
+      LETTERBOXD_USER: ${{ secrets.LETTERBOXD_USER }}
+      BACKLOGGD_USER: ${{ secrets.BACKLOGGD_USER }}
+      LASTFM_USER: ${{ secrets.LASTFM_USER }}
+      LASTFM_API_KEY: ${{ secrets.LASTFM_API_KEY }}
+      AOTY_USER: ${{ secrets.AOTY_USER }}
+      AOTY_COMPARE_MAX_PAGES: ${{ secrets.AOTY_COMPARE_MAX_PAGES }}
+      AOTY_COMPARE_PAGES_PER_RUN: ${{ secrets.AOTY_COMPARE_PAGES_PER_RUN }}
+      AOTY_REQUEST_DELAY_SECONDS: ${{ secrets.AOTY_REQUEST_DELAY_SECONDS }}
+      AOTY_INCOMING_LIST_PATH: ${{ secrets.AOTY_INCOMING_LIST_PATH }}
+      SERIALIZD_USER: ${{ secrets.SERIALIZD_USER }}
+      FUTEZ_USER_ID: ${{ secrets.FUTEZ_USER_ID }}
+      FUTEZ_PROFILE_URL: ${{ secrets.FUTEZ_PROFILE_URL }}
+
+    steps:
+      - name: Baixar projeto
+        uses: actions/checkout@v4
+
+      - name: Preparar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Restaurar cache do Rezistro
+        uses: actions/cache@v4
+        with:
+          path: cache
+          key: rezistro-cache-${{ github.run_id }}
+          restore-keys: |
+            rezistro-cache-
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Rodar modulo rapido
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '3/5 * * * *'
+        run: python run.py lastfm_recent
+
+      - name: Rodar modulos normais
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '13,43 * * * *'
+        run: |
+          python run.py aoty_feed
+          python run.py aoty_followers
+          python run.py aoty_incoming
+          python run.py backloggd
+          python run.py bds
+          python run.py futez
+          python run.py goodreads
+          python run.py goodreads_following
+          python run.py lastfm_comments
+          python run.py lastfm_loved
+          python run.py letterboxd
+          python run.py serializd
+          python run.py steam_achievements
+          python run.py steam_awards
+          python run.py steam_badges
+          python run.py steam_comments
+          python run.py steam_friends
+          python run.py steam_new
+          python run.py steam_perfect
+          python run.py steam_recent
+          python run.py steam_reviews
+          python run.py steam_screenshots
+
+      - name: Rodar modulo pesado
+        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '23 */6 * * *'
+        run: |
+          python run.py aoty_compare
+          python run.py steam_wishlist
