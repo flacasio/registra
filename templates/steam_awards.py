@@ -15,9 +15,4 @@ def make_card(activity):
         f"🎖️ <b>{activity['title']}</b>"
     )
 
-    if activity.get("text") and activity["text"] != activity["title"]:
-        card.add_line(
-            activity["text"]
-        )
-
     return card
