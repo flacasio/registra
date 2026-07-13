@@ -10,11 +10,12 @@ Armazenar o último estado conhecido
 de cada módulo.
 """
 
+import os
 import json
 from pathlib import Path
 
 
-CACHE_DIR = Path("cache")
+CACHE_DIR = Path(os.getenv("REZISTRO_CACHE_DIR", "cache"))
 
 CACHE_DIR.mkdir(
     exist_ok=True
@@ -108,6 +109,11 @@ def cache_diff(module, values):
 
     ]
 
+    if not atuais:
+        return []
+
+    atuais = list(dict.fromkeys(atuais))
+
     if arquivo.exists():
 
         texto_antigo = arquivo.read_text(
@@ -162,11 +168,17 @@ def cache_diff(module, values):
 
     ]
 
+    lembrados = atuais + [
+        v
+        for v in antigos
+        if v not in atuais
+    ]
+
     arquivo.write_text(
 
         json.dumps(
 
-            atuais,
+            lembrados[:500],
 
             ensure_ascii=False,
 
