@@ -1,4 +1,22 @@
 from bs4 import BeautifulSoup
+import hashlib
+
+
+def _clean(text):
+    return " ".join(str(text or "").split())
+
+
+def _stable_id(user, date, text):
+    seed = "|".join(
+        part.lower()
+        for part in (
+            _clean(user),
+            _clean(date),
+            _clean(text),
+        )
+        if part
+    )
+    return hashlib.sha1(seed.encode("utf-8")).hexdigest()
 
 
 def _parse_item(li):
@@ -10,6 +28,9 @@ def _parse_item(li):
     usuario = shout.select_one(".shout-user a")
     data = shout.select_one("time")
     corpo = shout.select_one(".shout-body")
+    user = usuario.get_text(strip=True) if usuario else ""
+    date = data["datetime"] if data and data.has_attr("datetime") else ""
+    text = corpo.get_text(" ", strip=True) if corpo else ""
 
     avatar = (
         li.select_one(".shout-user-avatar img")
@@ -17,9 +38,10 @@ def _parse_item(li):
     )
 
     item = {
-        "user": usuario.get_text(strip=True) if usuario else "",
-        "date": data["datetime"] if data and data.has_attr("datetime") else "",
-        "text": corpo.get_text(" ", strip=True) if corpo else "",
+        "id": _stable_id(user, date, text),
+        "user": user,
+        "date": date,
+        "text": text,
         "avatar": avatar.get("src") if avatar else None,
         "replies": []
     }

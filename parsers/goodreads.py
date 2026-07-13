@@ -3,6 +3,7 @@ Interpretar atividades do Goodreads a partir dos feeds RSS publicos.
 """
 
 from urllib.parse import urlsplit, urlunsplit
+import hashlib
 
 from bs4 import BeautifulSoup
 
@@ -10,6 +11,11 @@ from bs4 import BeautifulSoup
 def _text(item, name):
     tag = item.find(name)
     return tag.get_text(" ", strip=True) if tag else ""
+
+
+def _hash(text):
+    cleaned = " ".join(str(text or "").split())
+    return hashlib.sha1(cleaned.encode("utf-8")).hexdigest()[:12]
 
 
 def _clean_url(url):
@@ -65,7 +71,17 @@ def _parse_item(item, tipo):
         event_date = pub_date or read_at or date_added
 
     activity_id = "|".join(
-        part for part in (tipo, guid, event_date, rating, shelves) if part
+        part
+        for part in (
+            tipo,
+            book_id or guid,
+            event_date,
+            rating,
+            shelves,
+            read_at,
+            _hash(review) if review else "",
+        )
+        if part
     )
 
     return {
