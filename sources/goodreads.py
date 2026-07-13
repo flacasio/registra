@@ -3,6 +3,7 @@ Monitor do Goodreads.
 """
 
 from bs4 import BeautifulSoup
+from urllib.parse import urlencode
 
 from config import GOODREADS_USER_ID
 
@@ -23,9 +24,15 @@ SHELVES = [
 
 
 def _rss_url(shelf):
+    query = urlencode({
+        "shelf": shelf,
+        "sort": "date_updated",
+        "per_page": 100,
+    })
+
     return (
         "https://www.goodreads.com/review/list_rss/"
-        f"{GOODREADS_USER_ID}?shelf={shelf}"
+        f"{GOODREADS_USER_ID}?{query}"
     )
 
 
