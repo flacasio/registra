@@ -2,6 +2,39 @@ name: Rezistro
 
 on:
   workflow_dispatch:
+    inputs:
+      modulo:
+        description: "Modulo para rodar manualmente"
+        required: true
+        default: "all"
+        type: choice
+        options:
+          - all
+          - aoty_compare
+          - aoty_feed
+          - aoty_followers
+          - aoty_incoming
+          - backloggd
+          - bds
+          - futez
+          - goodreads
+          - goodreads_following
+          - lastfm_comments
+          - lastfm_loved
+          - lastfm_recent
+          - letterboxd
+          - serializd
+          - steam_achievements
+          - steam_awards
+          - steam_badges
+          - steam_comments
+          - steam_friends
+          - steam_new
+          - steam_perfect
+          - steam_recent
+          - steam_reviews
+          - steam_screenshots
+          - steam_wishlist
   schedule:
     # Rapido: Last.fm Recent, no menor intervalo permitido pelo GitHub Actions.
     - cron: "3/5 * * * *"
@@ -74,12 +107,16 @@ jobs:
       - name: Instalar dependencias
         run: pip install -r requirements.txt
 
+      - name: Rodar modulo manual selecionado
+        if: github.event_name == 'workflow_dispatch' && inputs.modulo != 'all'
+        run: python run.py "${{ inputs.modulo }}"
+
       - name: Rodar modulo rapido
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '3/5 * * * *'
+        if: (github.event_name == 'workflow_dispatch' && inputs.modulo == 'all') || github.event.schedule == '3/5 * * * *'
         run: python run.py lastfm_recent
 
       - name: Rodar modulos normais
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '13,43 * * * *'
+        if: (github.event_name == 'workflow_dispatch' && inputs.modulo == 'all') || github.event.schedule == '13,43 * * * *'
         run: |
           python run.py aoty_feed
           python run.py aoty_followers
@@ -105,7 +142,7 @@ jobs:
           python run.py steam_screenshots
 
       - name: Rodar modulo pesado
-        if: github.event_name == 'workflow_dispatch' || github.event.schedule == '23 */6 * * *'
+        if: (github.event_name == 'workflow_dispatch' && inputs.modulo == 'all') || github.event.schedule == '23 */6 * * *'
         run: |
           python run.py aoty_compare
           python run.py steam_wishlist
