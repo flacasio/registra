@@ -107,7 +107,6 @@ def parse(html):
                 action,
                 game.get("href", ""),
                 review.get("href", "") if review else "",
-                _timestamp_text(text),
                 _review_text(item),
             ) if part
         )
