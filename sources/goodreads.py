@@ -2,6 +2,8 @@
 Monitor do Goodreads.
 """
 
+import os
+
 from bs4 import BeautifulSoup
 from urllib.parse import urlencode
 
@@ -46,6 +48,24 @@ def _download_activities(shelf, tipo):
     return parse_rss_items(soup, tipo)
 
 
+def _force_enabled():
+    return os.getenv("REZISTRO_FORCE_GOODREADS", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "sim",
+    }
+
+
+def _force_limit():
+    raw = os.getenv("GOODREADS_FORCE_LIMIT_PER_SHELF", "3").strip()
+
+    try:
+        return max(1, int(raw))
+    except ValueError:
+        return 3
+
+
 def run():
     header("Goodreads")
 
@@ -54,11 +74,19 @@ def run():
         return
 
     enviados = 0
+    force = _force_enabled()
+    force_limit = _force_limit()
+
+    if force:
+        warning(
+            "Modo resgate ativado: enviando itens recentes mesmo se o cache ja conhece."
+        )
 
     for shelf, tipo in SHELVES:
         info(f"Baixando feed: {shelf}")
 
         activities = _download_activities(shelf, tipo)
+        info(f"{len(activities)} item(ns) encontrado(s) em {shelf}.")
 
         if not activities:
             warning(f"Nenhuma atividade em {shelf}.")
@@ -66,7 +94,12 @@ def run():
 
         module = _cache_module(tipo)
         ids = [activity["id"] for activity in activities]
-        novos = set(cache_diff(module, ids))
+
+        if force:
+            selecionadas = activities[:force_limit]
+            novos = {activity["id"] for activity in selecionadas}
+        else:
+            novos = set(cache_diff(module, ids))
 
         if not novos:
             warning(f"Nenhuma novidade em {shelf}.")
