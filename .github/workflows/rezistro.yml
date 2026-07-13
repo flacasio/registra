@@ -18,6 +18,7 @@ on:
           - bds
           - futez
           - goodreads
+          - goodreads_force
           - goodreads_following
           - lastfm_comments
           - lastfm_loved
@@ -95,6 +96,7 @@ jobs:
 
           echo "CACHE_SCOPE=$scope" >> "$GITHUB_ENV"
           echo "REZISTRO_CACHE_DIR=cache/$scope" >> "$GITHUB_ENV"
+          echo "Cache usado nesta rodada: cache/$scope"
 
       - name: Restaurar cache do Rezistro
         uses: actions/cache@v4
@@ -108,8 +110,14 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Rodar modulo manual selecionado
-        if: github.event_name == 'workflow_dispatch' && inputs.modulo != 'all'
+        if: github.event_name == 'workflow_dispatch' && inputs.modulo != 'all' && inputs.modulo != 'goodreads_force'
         run: python run.py "${{ inputs.modulo }}"
+
+      - name: Rodar Goodreads em modo resgate
+        if: github.event_name == 'workflow_dispatch' && inputs.modulo == 'goodreads_force'
+        env:
+          REZISTRO_FORCE_GOODREADS: "1"
+        run: python run.py goodreads
 
       - name: Rodar modulo rapido
         if: (github.event_name == 'workflow_dispatch' && inputs.modulo == 'all') || github.event.schedule == '3/5 * * * *'
