@@ -2,15 +2,24 @@ from core.card import Card
 from core.card_style import add_posted_at, set_network_title
 
 
+def _action(activity):
+    if activity["tipo"] == "WATCH":
+        return "assistiu"
+
+    if activity["tipo"] == "WATCHLIST":
+        return "quer ver"
+
+    return "teve uma nova atividade"
+
+
 def make_card(activity):
     card = Card()
-    card.set_image(activity["poster"])
-    card.set_id(activity["id"])
 
-    if activity["tipo"] == "WATCH":
-        set_network_title(card, "🎬", "Letterboxd", "assistiu a um filme")
-    else:
-        set_network_title(card, "🎬", "Letterboxd", "teve uma nova atividade")
+    if activity.get("poster"):
+        card.set_image(activity["poster"])
+
+    card.set_id(activity["id"])
+    set_network_title(card, "🎬", "Letterboxd", _action(activity))
 
     card.add_line(
         f"🎞️ <b>{activity['titulo']}</b>"
