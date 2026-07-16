@@ -13,13 +13,13 @@ def _action(activity):
     tipo = activity["tipo"]
 
     if tipo == "CURRENTLY_READING":
-        return "está lendo um livro"
+        return "está lendo"
 
     if tipo == "WANT_TO_READ":
-        return "quer ler um livro"
+        return "quer ler"
 
     if activity.get("rating"):
-        return "avaliou um livro"
+        return "avaliou"
 
     return "marcou um livro como lido"
 
