@@ -9,7 +9,7 @@ def make_card(activity):
     if activity.get("image"):
         card.set_image(activity["image"])
 
-    set_network_title(card, "📀", "AOTY", "adicionou um lançamento ao radar")
+    set_network_title(card, "📀", "AOTY", "está de olho")
 
     card.add_line(
         f"💿 <b>{activity['album']}</b>"
