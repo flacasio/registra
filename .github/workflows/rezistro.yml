@@ -24,6 +24,7 @@ on:
           - lastfm_loved
           - lastfm_recent
           - letterboxd
+          - letterboxd_watchlist
           - serializd
           - steam_achievements
           - steam_awards
@@ -137,6 +138,7 @@ jobs:
           python run.py lastfm_comments
           python run.py lastfm_loved
           python run.py letterboxd
+          python run.py letterboxd_watchlist
           python run.py serializd
           python run.py steam_achievements
           python run.py steam_awards
