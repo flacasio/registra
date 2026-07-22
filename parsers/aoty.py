@@ -60,8 +60,12 @@ def parse(html):
         if not album or not rating:
             continue
 
+        # O tempo relativo muda continuamente ("há 4 horas", "há 8 horas"),
+        # portanto nunca pode fazer parte da identidade persistente do evento.
+        # A combinação álbum + nota permanece estável e ainda detecta uma
+        # eventual alteração de avaliação como um novo evento.
         activity_id = "|".join(
-            part for part in (album_url, rating, relative_time) if part
+            part for part in (album_url or album, rating) if part
         )
 
         activities.append({
