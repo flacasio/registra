@@ -20,18 +20,30 @@ def _image_url(img):
     if not img:
         return ""
 
-    srcset = img.get("srcset", "")
+    # As paginas de notas do AOTY usam lazy-loading e podem deixar um
+    # placeholder em src/srcset. Os atributos data-* guardam a capa real.
+    for attribute in (
+        "data-src",
+        "data-lazy-src",
+        "data-original",
+        "data-srcset",
+        "srcset",
+        "src",
+    ):
+        value = img.get(attribute, "")
 
-    if srcset:
-        first = srcset.split(",")[0].strip().split(" ")[0]
+        if not value:
+            continue
 
-        if first:
-            return urljoin(BASE_URL, first)
+        for candidate in str(value).split(","):
+            image_url = candidate.strip().split(" ")[0]
 
-    return urljoin(
-        BASE_URL,
-        img.get("data-src") or img.get("src") or "",
-    )
+            if not image_url or image_url.startswith(("data:", "blob:")):
+                continue
+
+            return urljoin(BASE_URL, image_url)
+
+    return ""
 
 
 def parse(html):
