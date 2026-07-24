@@ -14,6 +14,7 @@ on:
           - aoty_feed
           - aoty_followers
           - aoty_incoming
+          - aoty_incoming_force
           - backloggd
           - bds
           - futez
@@ -111,7 +112,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Rodar modulo manual selecionado
-        if: github.event_name == 'workflow_dispatch' && inputs.modulo != 'all' && inputs.modulo != 'goodreads_force'
+        if: github.event_name == 'workflow_dispatch' && inputs.modulo != 'all' && inputs.modulo != 'goodreads_force' && inputs.modulo != 'aoty_incoming_force'
         run: python run.py "${{ inputs.modulo }}"
 
       - name: Rodar Goodreads em modo resgate
@@ -119,6 +120,12 @@ jobs:
         env:
           REZISTRO_FORCE_GOODREADS: "1"
         run: python run.py goodreads
+
+      - name: Rodar AOTY Incoming em modo teste
+        if: github.event_name == 'workflow_dispatch' && inputs.modulo == 'aoty_incoming_force'
+        env:
+          REZISTRO_FORCE_AOTY_INCOMING: "1"
+        run: python run.py aoty_incoming
 
       - name: Rodar modulo rapido
         if: (github.event_name == 'workflow_dispatch' && inputs.modulo == 'all') || github.event.schedule == '3/5 * * * *'
