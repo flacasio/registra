@@ -363,6 +363,7 @@ def wishlist_json():
         pass
 
     last_error = None
+    empty_payload = None
 
     for url in urls:
         response = requests.get(
@@ -373,10 +374,23 @@ def wishlist_json():
 
         try:
             response.raise_for_status()
-            return response.json()
-        except ValueError as exc:
+            data = response.json()
+        except (requests.RequestException, ValueError) as exc:
             last_error = exc
             continue
+
+        # A Steam pode responder {} no endpoint de vanity mesmo quando
+        # o endpoint por SteamID64 contém a wishlist completa.
+        if data:
+            return data
+
+        empty_payload = data
+
+    # Se todos os endpoints responderem JSON vazio, preserva a possibilidade
+    # de a wishlist estar realmente vazia. Erros só vencem quando nenhum
+    # endpoint retornou sequer um JSON válido.
+    if empty_payload is not None:
+        return empty_payload
 
     if last_error:
         raise last_error
