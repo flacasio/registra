@@ -45,8 +45,8 @@ TELEGRAM_TOKEN = _valor("TELEGRAM_TOKEN")
 CHAT_ID = _valor("CHAT_ID")
 
 # Nome exibido nos cards
-DISPLAY_NAME = _valor("DISPLAY_NAME", "Zi")
-REAL_NAME = _valor("REAL_NAME", "Rachel")
+DISPLAY_NAME = _valor("DISPLAY_NAME")
+REAL_NAME = _valor("REAL_NAME")
 DISPLAY_EMOJI = _valor("DISPLAY_EMOJI", "🐇")
 
 # Banco de Series
