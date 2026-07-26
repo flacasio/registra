@@ -1,0 +1,30 @@
+# Variaveis locais e credenciais
+.env
+.env.*
+!.env.example
+
+# Cache e estado local do Rezistro
+cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Ambientes virtuais
+.venv/
+venv/
+env/
+
+# Editores e sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Logs e temporarios
+*.log
+*.tmp
