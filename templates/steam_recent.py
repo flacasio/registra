@@ -26,8 +26,8 @@ def make_card(activity):
 
         card.add_lines(
             f"🎮 <b>{activity['titulo']}</b>",
-            f"⌚ <b>{tempo_recente}</b> nas últimas 2 semanas",
-            f"⏱️ <b>{tempo_total}</b> no total",
+            f"⌚ <b>{tempo_recente}</b> recente",
+            f"⏱️ <b>{tempo_total}</b> total",
             "",
             f'🔗 <a href="{activity["url"]}">Ver na Steam</a>',
         )
