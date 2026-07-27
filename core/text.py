@@ -109,10 +109,7 @@ def format_datetime_sp(value, empty="Data desconhecida"):
     if dt is None:
         return empty
 
-    return (
-        f"{dt.day} de {MONTHS_PT[dt.month]} de {dt.year} "
-        f"às {dt:%H:%M}"
-    )
+    return f"{dt:%d/%m/%Y}, às {dt:%H:%M}"
 
 
 def format_date_sp(value, empty="Data desconhecida"):
@@ -121,4 +118,4 @@ def format_date_sp(value, empty="Data desconhecida"):
     if dt is None:
         return empty
 
-    return f"{dt.day} de {MONTHS_PT[dt.month]} de {dt.year}"
+    return f"{dt:%d/%m/%Y}"
