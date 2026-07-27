@@ -9,12 +9,12 @@ def make_card(activity):
     if activity.get("avatar"):
         card.set_image(activity["avatar"])
 
-    set_network_title(card, "💬", "Last.fm", "recebeu um comentário")
+    set_network_title(card, "💬", "Last.fm", "foi comentada")
 
     card.add_lines(
         f"👤 {activity['user']}",
         "",
-        activity["text"],
+        f"✍ {activity['text']}",
     )
 
     add_posted_at(card, activity.get("date"))
