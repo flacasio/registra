@@ -2,7 +2,7 @@
 
 ## Princípios
 
-Os cards do Rezistro devem ser rápidos de ler, consistentes entre plataformas e livres de texto redundante.
+Os cards do Registra! devem ser rápidos de ler, consistentes entre plataformas e livres de texto redundante.
 
 - O título da rede identifica a origem do evento.
 - A linha seguinte usa o padrão `nome exibido + verbo`.
