@@ -1,5 +1,6 @@
 from core.card import Card
 from core.card_style import add_posted_at, set_network_title
+from core.text import clean_media_title
 
 
 def make_card(activity):
@@ -12,13 +13,13 @@ def make_card(activity):
     set_network_title(card, "💘", "Last.fm", "amou")
 
     card.add_lines(
-        f"🎵 <b>{activity['titulo']}</b>",
+        f"🎵 <b>{clean_media_title(activity['titulo'])}</b>",
         f"🎤 {activity['artista']}",
     )
 
     if activity["album"]:
         card.add_line(
-            f"💿 <i>{activity['album']}</i>"
+            f"💿 <i>{clean_media_title(activity['album'])}</i>"
         )
 
     add_posted_at(card, activity["timestamp"])
