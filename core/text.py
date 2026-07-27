@@ -64,7 +64,7 @@ EDITION_KEYWORDS = (
 )
 
 EDITION_SUFFIX = re.compile(
-    r"(?:\s*[-–—:]\s*)?[\[(](?P<label>[^\])]+)[\])]\s*$",
+    r"(?:\s*[-–—:]\s*)?[\[(](?P<label>[^)\]]+)[)\]]\s*$",
     re.IGNORECASE,
 )
 
