@@ -1,5 +1,6 @@
 from core.card import Card
 from core.card_style import set_network_title
+from core.text import clean_media_title
 
 
 def _direction(old_rating, new_rating):
@@ -33,7 +34,7 @@ def make_card(activity):
     set_network_title(card, "📀", "AOTY", "reavaliou")
 
     card.add_lines(
-        f"💿 <b>{activity['album']}</b>",
+        f"💿 <b>{clean_media_title(activity['album'])}</b>",
         f"👤 {activity['artist']}",
         f"{emoji} <b>{activity['old_rating']} → {activity['new_rating']}</b>",
     )
