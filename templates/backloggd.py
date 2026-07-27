@@ -6,7 +6,7 @@ from core.card_style import set_network_title
 ACTION_TEXT = {
     "ABANDONED": "abandonou",
     "COMPLETED": "concluiu",
-    "PLAYING": "começou a jogar",
+    "PLAYING": "começou",
     "ACTIVITY": "atualizou",
 }
 
@@ -44,7 +44,7 @@ def make_card(activity):
 
     action = ACTION_TEXT.get(activity["tipo"], "atualizou")
 
-    set_network_title(card, "👾", "Backloggd", f"{action} um jogo")
+    set_network_title(card, "👾", "Backloggd", action)
 
     card.add_line(
         f"🎮 <b>{activity['game']}</b>"
