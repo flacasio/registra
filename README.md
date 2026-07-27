@@ -1,6 +1,6 @@
 # Registra!
 
-Rezistra! e um agregador pessoal de atualizacoes em redes sociais e servicos de midia.
+Rezistra! é um agregador pessoal de atualizacoes em redes sociais e servicos de midia.
 
 Ele consulta plataformas como Banco de Series, Goodreads, Steam, Backloggd,
 Letterboxd, Last.fm, Album of the Year, Serializd e Futez, detecta novidades e envia
