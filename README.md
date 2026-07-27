@@ -1,6 +1,6 @@
 # Registra!
-
 **Registra!** é um agregador modular de atividades públicas em plataformas de entretenimento e mídia.
+
 
 O projeto consulta serviços como Banco de Séries, Goodreads, Steam, Backloggd, Letterboxd, Last.fm, Album of the Year, Serializd e Futez, detecta novas atividades e as transforma em cards padronizados enviados ao Telegram.
 
