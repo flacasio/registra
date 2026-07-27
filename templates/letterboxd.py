@@ -25,6 +25,11 @@ def make_card(activity):
         f"🎞️ <b>{activity['titulo']}</b>"
     )
 
+    if activity.get("rating"):
+        card.add_line(
+            f"⭐️ {activity['rating']}"
+        )
+
     add_posted_at(card, activity.get("published"))
 
     card.add_lines(
