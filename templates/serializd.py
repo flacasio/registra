@@ -3,7 +3,7 @@ from core.card_style import add_posted_at, set_network_title
 
 
 ACTION_BY_KIND = {
-    "LOGGED": "registrou um episódio",
+    "LOGGED": "assistiu",
     "RATED": "avaliou uma série",
     "REVIEWED": "comentou uma série",
     "WATCHLIST": "adicionou uma série à lista",
@@ -46,7 +46,7 @@ def make_card(activity):
 
     if activity.get("episode"):
         card.add_line(
-            f"📼 {activity['episode']}"
+            f"📺 {activity['episode']}"
         )
 
     card.add_line(
