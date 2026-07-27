@@ -22,7 +22,7 @@ def make_card(activity):
 
     for line in activity.get("extra_lines", []):
         card.add_line(
-            f"📝 {line}"
+            f"📅 {line}"
         )
 
     if activity.get("url"):
