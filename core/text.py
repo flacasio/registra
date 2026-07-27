@@ -2,6 +2,7 @@
 Tratamento de texto exibido nos cards.
 """
 
+import re
 from datetime import datetime, timezone, timedelta
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
@@ -39,6 +40,39 @@ COMMON_TRANSLATIONS = {
     "Want to read": "Quero ler",
 }
 
+EDITION_KEYWORDS = (
+    "anniversary",
+    "aniversário",
+    "bonus track",
+    "bonus tracks",
+    "collector's",
+    "collectors",
+    "deluxe",
+    "edition",
+    "edição",
+    "expanded",
+    "extended",
+    "limited",
+    "portuguese",
+    "português",
+    "reissue",
+    "remaster",
+    "remastered",
+    "special",
+    "version",
+    "versão",
+)
+
+EDITION_SUFFIX = re.compile(
+    r"(?:\s*[-–—:]\s*)?[\[(](?P<label>[^)\]]+)[)\]]\s*$",
+    re.IGNORECASE,
+)
+
+DASH_EDITION_SUFFIX = re.compile(
+    r"\s*[-–—:]\s*(?P<label>[^\-–—:]+)\s*$",
+    re.IGNORECASE,
+)
+
 
 def translate_common_text(text):
     for original, translated in COMMON_TRANSLATIONS.items():
@@ -57,6 +91,29 @@ def display_text(value):
         text = text.replace(REAL_NAME, DISPLAY_NAME)
 
     return translate_common_text(text)
+
+
+def clean_media_title(value):
+    """Remove apenas sufixos finais que descrevem edição ou versão."""
+    if value is None:
+        return ""
+
+    title = str(value).strip()
+
+    while title:
+        match = EDITION_SUFFIX.search(title) or DASH_EDITION_SUFFIX.search(title)
+
+        if not match:
+            break
+
+        label = match.group("label").casefold()
+
+        if not any(keyword.casefold() in label for keyword in EDITION_KEYWORDS):
+            break
+
+        title = title[:match.start()].rstrip(" -–—:")
+
+    return title
 
 
 def _coerce_datetime(value):
@@ -109,10 +166,7 @@ def format_datetime_sp(value, empty="Data desconhecida"):
     if dt is None:
         return empty
 
-    return (
-        f"{dt.day} de {MONTHS_PT[dt.month]} de {dt.year} "
-        f"às {dt:%H:%M}"
-    )
+    return f"{dt:%d/%m/%Y}, às {dt:%H:%M}"
 
 
 def format_date_sp(value, empty="Data desconhecida"):
@@ -121,4 +175,4 @@ def format_date_sp(value, empty="Data desconhecida"):
     if dt is None:
         return empty
 
-    return f"{dt.day} de {MONTHS_PT[dt.month]} de {dt.year}"
+    return f"{dt:%d/%m/%Y}"

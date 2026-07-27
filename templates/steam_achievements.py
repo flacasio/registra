@@ -8,7 +8,7 @@ def make_card(activity):
     card.set_id(activity["id"])
     card.set_image(achievement_card_image(activity))
 
-    set_network_title(card, "🕹️", "Steam", "conquistou novos troféus")
+    set_network_title(card, "🥇", "Steam", "conquistou")
 
     card.add_lines(
         f"🎮 <b>{activity['game']}</b>",
@@ -17,7 +17,7 @@ def make_card(activity):
 
     if activity.get("description"):
         card.add_line(
-            f"💬 {activity['description']}"
+            f"📋 {activity['description']}"
         )
 
     add_posted_at(card, activity.get("unlocktime"))

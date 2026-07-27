@@ -9,10 +9,10 @@ def make_card(activity):
     if activity.get("image"):
         card.set_image(activity["image"])
 
-    set_network_title(card, "🕹️", "Steam", "recebeu um prêmio")
+    set_network_title(card, "🎖", "Steam", "foi premiada")
 
     card.add_line(
-        f"🎖️ <b>{activity['title']}</b>"
+        f"🏅 <b>{activity['title']}</b>"
     )
 
     return card

@@ -1,5 +1,6 @@
 from core.card import Card
 from core.card_style import set_network_title
+from core.text import clean_media_title
 
 
 def _direction(old_rating, new_rating):
@@ -7,15 +8,15 @@ def _direction(old_rating, new_rating):
         old_value = float(str(old_rating).replace(",", "."))
         new_value = float(str(new_rating).replace(",", "."))
     except ValueError:
-        return "🔁", "atualizou a nota de um álbum"
+        return "🔁"
 
     if new_value > old_value:
-        return "📈", "subiu a nota de um álbum"
+        return "↗️"
 
     if new_value < old_value:
-        return "📉", "baixou a nota de um álbum"
+        return "↘️"
 
-    return "🔁", "atualizou a nota de um álbum"
+    return "🔁"
 
 
 def make_card(activity):
@@ -25,15 +26,15 @@ def make_card(activity):
     if activity.get("image"):
         card.set_image(activity["image"])
 
-    emoji, action = _direction(
+    emoji = _direction(
         activity["old_rating"],
         activity["new_rating"],
     )
 
-    set_network_title(card, "📀", "AOTY", action)
+    set_network_title(card, "📀", "AOTY", "reavaliou")
 
     card.add_lines(
-        f"💿 <b>{activity['album']}</b>",
+        f"💿 <b>{clean_media_title(activity['album'])}</b>",
         f"👤 {activity['artist']}",
         f"{emoji} <b>{activity['old_rating']} → {activity['new_rating']}</b>",
     )

@@ -1,4 +1,4 @@
-name: Rezistro
+name: Registra!
 
 on:
   workflow_dispatch:
@@ -100,7 +100,7 @@ jobs:
           echo "REZISTRO_CACHE_DIR=cache/$scope" >> "$GITHUB_ENV"
           echo "Cache usado nesta rodada: cache/$scope"
 
-      - name: Restaurar cache do Rezistro
+      - name: Restaurar cache do Registra!
         uses: actions/cache@v4
         with:
           path: cache/${{ env.CACHE_SCOPE }}
