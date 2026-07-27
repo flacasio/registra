@@ -150,7 +150,7 @@ Antes de ativar um módulo em produção:
 
 ## Instruções para assistentes de IA
 
-Antes de modificar o Rezistro:
+Antes de modificar o Registra!:
 
 1. ler `README.md`;
 2. ler `docs/CARD_STYLE_GUIDE.md`;
