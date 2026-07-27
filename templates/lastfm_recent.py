@@ -16,7 +16,7 @@ def make_card(activity):
     if activity["capa"]:
         card.set_image(activity["capa"])
 
-    set_network_title(card, "🎧", "Last.fm", "escutou uma música")
+    set_network_title(card, "🎧", "Last.fm", "escutou")
 
     card.add_lines(
         f"🎵 <b>{activity['titulo']}</b>",
