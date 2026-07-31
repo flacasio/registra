@@ -21,9 +21,9 @@ def make_card(activity):
             f"👤 {activity['artist']}"
         )
 
-    for line in activity.get("extra_lines", []):
+    if activity.get("release_date"):
         card.add_line(
-            f"📅 {line}"
+            f"📅 {activity['release_date']}"
         )
 
     if activity.get("url"):
