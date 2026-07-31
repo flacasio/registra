@@ -117,48 +117,68 @@ def _image_url(block):
     return ""
 
 
-def _extra_lines(block, artist, album):
-    ignored = {
-        artist,
-        album,
-    }
-    lines = []
-
-    selectors = [
-        ".listComment",
-        ".comment",
-        ".description",
-        ".notes",
-        ".date",
+def _release_date(block):
+    selectors = (
         ".releaseDate",
         ".albumDate",
-    ]
+        ".date",
+    )
+
+    candidates = []
 
     for selector in selectors:
         for node in block.select(selector):
             text = _clean(node.get_text(" ", strip=True))
 
-            if text and text not in ignored and text not in lines:
-                lines.append(text)
+            if text and text not in candidates:
+                candidates.append(text)
 
-    if lines:
-        return lines
+    if not candidates:
+        candidates = [
+            _clean(line)
+            for line in block.get_text("\n", strip=True).splitlines()
+        ]
 
-    raw_lines = [
-        _clean(line)
-        for line in block.get_text("\n", strip=True).splitlines()
-    ]
+    # O AOTY pode repetir a data em versoes visual e acessivel do mesmo bloco.
+    # Mantemos somente a primeira data real encontrada, normalizada para dia/mes.
+    for text in candidates:
+        numeric = re.search(r"\b(\d{1,2})/(\d{1,2})(?:/\d{2,4})?\b", text)
 
-    for line in raw_lines:
-        if not line or line in ignored or line in lines:
-            continue
+        if numeric:
+            return f"{int(numeric.group(1)):02d}/{int(numeric.group(2)):02d}"
 
-        if line == "Upcoming" or line == "List":
-            continue
+        named = re.search(
+            r"\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)[a-z]*\s+(\d{1,2})\b",
+            text,
+            re.IGNORECASE,
+        )
 
-        lines.append(line)
+        if named:
+            month_match = re.search(
+                r"\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Sept|Oct|Nov|Dec)",
+                text,
+                re.IGNORECASE,
+            )
+            months = {
+                "jan": 1,
+                "feb": 2,
+                "mar": 3,
+                "apr": 4,
+                "may": 5,
+                "jun": 6,
+                "jul": 7,
+                "aug": 8,
+                "sep": 9,
+                "sept": 9,
+                "oct": 10,
+                "nov": 11,
+                "dec": 12,
+            }
+            month = months[month_match.group(1).lower()]
+            day = int(named.group(1))
+            return f"{day:02d}/{month:02d}"
 
-    return lines[:6]
+    return ""
 
 
 def _parse_block(block):
@@ -168,6 +188,9 @@ def _parse_block(block):
 
     if not album and link:
         album = _clean(link.get_text(" ", strip=True))
+
+    # Alguns cards do AOTY incluem o ano como sufixo do titulo.
+    album = re.sub(r"\s+\d{4}$", "", album).strip()
 
     album_url = urljoin(BASE_URL, link["href"]) if link else ""
 
@@ -184,7 +207,7 @@ def _parse_block(block):
         "album": album,
         "image": _image_url(block),
         "url": album_url,
-        "extra_lines": _extra_lines(block, artist, album),
+        "release_date": _release_date(block),
     }
 
 
