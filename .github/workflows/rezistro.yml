@@ -39,8 +39,8 @@ on:
           - steam_screenshots
           - steam_wishlist
   schedule:
-    # Rapido: Last.fm Recent, no menor intervalo permitido pelo GitHub Actions.
-    - cron: "3/5 * * * *"
+    # Rapido: Last.fm Recent, em intervalo de 10 minutos para evitar sobreposicao da fila.
+    - cron: "3/10 * * * *"
     # Normal: demais modulos leves/medios, duas vezes por hora.
     - cron: "13,43 * * * *"
     # Pesado: comparacao longa do AOTY, isolada e bem mais lenta.
@@ -88,7 +88,7 @@ jobs:
 
       - name: Definir escopo do cache
         run: |
-          if [ "${{ github.event.schedule }}" = "3/5 * * * *" ]; then
+          if [ "${{ github.event.schedule }}" = "3/10 * * * *" ]; then
             scope="rapido"
           elif [ "${{ github.event.schedule }}" = "23 */6 * * *" ]; then
             scope="pesado"
@@ -128,7 +128,7 @@ jobs:
         run: python run.py aoty_incoming
 
       - name: Rodar modulo rapido
-        if: (github.event_name == 'workflow_dispatch' && inputs.modulo == 'all') || github.event.schedule == '3/5 * * * *'
+        if: (github.event_name == 'workflow_dispatch' && inputs.modulo == 'all') || github.event.schedule == '3/10 * * * *'
         run: python run.py lastfm_recent
 
       - name: Rodar modulos normais
