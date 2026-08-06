@@ -47,7 +47,7 @@ on:
     - cron: "23 */6 * * *"
 
 concurrency:
-  group: rezistro
+  group: rezistro-${{ github.event.schedule || inputs.modulo || 'manual' }}
   cancel-in-progress: false
 
 jobs:
