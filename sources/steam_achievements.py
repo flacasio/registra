@@ -19,6 +19,14 @@ from templates.steam_achievements import make_card
 MODULE = "steam_achievements"
 RECOVERY_WINDOW_HOURS = 72
 
+# Resgate unico do lote que foi detectado em 08/08/2026, mas nao chegou ao
+# Telegram por causa de uma imagem quebrada da Steam CDN. A janela reproduz
+# exatamente as 72h que o modulo usou naquela execucao.
+RESCUE_APPID = "2142790"
+RESCUE_START_UTC = 1785962831  # 2026-08-05 20:47:11 UTC
+RESCUE_END_UTC = 1786222031    # 2026-08-08 20:47:11 UTC
+RESCUE_MODULE = f"{MODULE}_{RESCUE_APPID}_lost_20260808"
+
 
 def _configured_appids():
     return [
@@ -124,6 +132,42 @@ def _deliver(module, activity, recovery=False):
     _remember(module, activity["id"])
 
 
+def _rescue_lost_batch(appid, activities):
+    if appid != RESCUE_APPID:
+        return 0
+
+    delivered = set(_known_ids(RESCUE_MODULE))
+    rescue = [
+        activity
+        for activity in activities
+        if RESCUE_START_UTC <= int(activity.get("unlocktime", 0) or 0) <= RESCUE_END_UTC
+        and str(activity["id"]) not in delivered
+    ]
+
+    if not rescue:
+        return 0
+
+    warning(
+        f"Resgatando {len(rescue)} conquista(s) perdidas do lote de 08/08/2026."
+    )
+
+    enviados = 0
+
+    for activity in reversed(rescue):
+        info("Montando card de resgate historico...")
+        card = make_card(activity)
+
+        info("Enviando Telegram...")
+        send(card)
+
+        # Marcador separado do cache normal. Assim este resgate e idempotente:
+        # cada conquista do lote e enviada no maximo uma vez.
+        _remember(RESCUE_MODULE, activity["id"])
+        enviados += 1
+
+    return enviados
+
+
 def run():
     header("Steam • Achievements")
 
@@ -162,6 +206,10 @@ def run():
         if not activities:
             warning(f"Nenhuma conquista encontrada para {appid}.")
             continue
+
+        # O lote perdido e tratado por um marcador proprio, independente do
+        # cache normal que ja havia considerado essas conquistas como vistas.
+        enviados += _rescue_lost_batch(appid, activities)
 
         module = f"{MODULE}_{appid}"
 
