@@ -2,11 +2,12 @@
 Monitor de conquistas da Steam.
 """
 
+import json
 from time import time
 
 from config import STEAM_ACHIEVEMENTS_APPIDS, STEAM_API_KEY, STEAM_USER
 
-from core.cache import cache_current, cache_diff
+from core.cache import cache_current, cache_save
 from core.console import header, info, success, warning
 from core.steam import achievement_schema, player_achievements, recent_games
 from core.telegram import send
@@ -49,9 +50,6 @@ def _recent_appids():
 
 
 def _appids():
-    # Jogos recentes sao a fonte principal. A configuracao manual continua
-    # funcionando como complemento para jogos que o usuario queira vigiar
-    # mesmo sem terem sido jogados recentemente.
     return list(dict.fromkeys(_recent_appids() + _configured_appids()))
 
 
@@ -63,6 +61,67 @@ def _recover_recent_achievements(activities):
         for activity in activities
         if int(activity.get("unlocktime", 0) or 0) >= cutoff
     ]
+
+
+def _known_ids(module):
+    raw = cache_current(module)
+
+    if not raw:
+        return []
+
+    try:
+        values = json.loads(raw)
+    except json.JSONDecodeError:
+        values = [raw]
+
+    if not isinstance(values, list):
+        values = [values]
+
+    return [str(value) for value in values]
+
+
+def _save_ids(module, values):
+    unique = list(dict.fromkeys(str(value) for value in values))
+    cache_save(
+        module,
+        json.dumps(unique[:500], ensure_ascii=False, indent=4),
+    )
+
+
+def _remember(module, achievement_id):
+    known = _known_ids(module)
+    achievement_id = str(achievement_id)
+
+    if achievement_id in known:
+        return
+
+    _save_ids(module, [achievement_id] + known)
+
+
+def _unseen(module, activities):
+    known = set(_known_ids(module))
+    return [
+        activity
+        for activity in activities
+        if str(activity["id"]) not in known
+    ]
+
+
+def _deliver(module, activity, recovery=False):
+    if recovery:
+        info("Montando card de recuperacao...")
+    else:
+        info("Montando card...")
+
+    card = make_card(activity)
+
+    info("Enviando Telegram...")
+    send(card)
+
+    # A conquista so passa a ser conhecida depois que o Telegram confirmou
+    # o envio. Se qualquer etapa acima falhar, ela continua pendente para a
+    # proxima execucao.
+    _remember(module, activity["id"])
 
 
 def run():
@@ -98,7 +157,6 @@ def run():
             continue
 
         info("Interpretando conquistas...")
-
         activities = parse(payload, schema, appid)
 
         if not activities:
@@ -106,12 +164,20 @@ def run():
             continue
 
         module = f"{MODULE}_{appid}"
-        ids = [activity["id"] for activity in activities]
 
         if not cache_current(module):
-            cache_diff(module, ids)
-
             recentes = _recover_recent_achievements(activities)
+            recent_ids = {activity["id"] for activity in recentes}
+
+            # Na primeira observacao, conquistas antigas entram como base sem
+            # gerar notificacao. As recentes ficam fora do cache ate serem
+            # efetivamente entregues.
+            antigos = [
+                activity["id"]
+                for activity in activities
+                if activity["id"] not in recent_ids
+            ]
+            _save_ids(module, antigos)
 
             if not recentes:
                 warning(
@@ -127,32 +193,19 @@ def run():
             )
 
             for activity in reversed(recentes):
-                info("Montando card de recuperacao...")
-                card = make_card(activity)
-
-                info("Enviando Telegram...")
-                send(card)
+                _deliver(module, activity, recovery=True)
                 enviados += 1
 
             continue
 
-        novos = set(cache_diff(module, ids))
+        novas = _unseen(module, activities)
 
-        if not novos:
+        if not novas:
             warning(f"Nenhuma conquista nova para {appid}.")
             continue
 
-        for activity in reversed(activities):
-            if activity["id"] not in novos:
-                continue
-
-            info("Montando card...")
-
-            card = make_card(activity)
-
-            info("Enviando Telegram...")
-
-            send(card)
+        for activity in reversed(novas):
+            _deliver(module, activity)
             enviados += 1
 
     if enviados:
