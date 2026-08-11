@@ -23,6 +23,21 @@ def _validar_config():
         raise RuntimeError("CHAT_ID nao configurado.")
 
 
+def _send_text(card: Card):
+    resposta = requests.post(
+        f"{_api_url()}/sendMessage",
+        data={
+            "chat_id": CHAT_ID,
+            "text": card.to_caption(),
+            "parse_mode": "HTML",
+        },
+        timeout=30,
+    )
+
+    resposta.raise_for_status()
+    return resposta.json()
+
+
 def send(card: Card):
     if not isinstance(card, Card):
         raise TypeError("send() aceita apenas objetos Card.")
@@ -30,21 +45,13 @@ def send(card: Card):
     _validar_config()
 
     if not card.image:
-        resposta = requests.post(
-            f"{_api_url()}/sendMessage",
-            data={
-                "chat_id": CHAT_ID,
-                "text": card.to_caption(),
-                "parse_mode": "HTML",
-            },
-            timeout=30,
-        )
+        return _send_text(card)
 
-        resposta.raise_for_status()
+    try:
+        imagem = BytesIO(download_bytes(card.image))
+    except requests.RequestException:
+        return _send_text(card)
 
-        return resposta.json()
-
-    imagem = BytesIO(download_bytes(card.image))
     imagem.name = "card.jpg"
 
     resposta = requests.post(
